@@ -336,37 +336,37 @@ input[type="text"]:focus {
   box-shadow: 0 0 0 4px rgba(232,180,168,.55);
 }
 
-.stepper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 22px;
+.optional {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--mocha);
 }
 
-.stepper button {
-  width: 46px;
-  height: 46px;
+textarea {
+  display: block;
+  width: 100%;
+  min-height: 112px;
+  padding: 14px 16px;
   font: inherit;
-  font-size: 1.5rem;
-  line-height: 1;
-  color: var(--burgundy);
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--ink);
   background: #FFFCF9;
   border: 1px solid var(--line);
-  border-radius: 50%;
-  cursor: pointer;
+  border-radius: 14px;
+  outline: none;
+  resize: vertical;
+  transition: border-color .15s, box-shadow .15s;
 }
 
-.stepper button:disabled { opacity: .35; cursor: default; }
+textarea::placeholder { color: #B5A69A; font-style: italic; }
 
-.stepper output {
-  min-width: 2ch;
-  text-align: center;
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--ink);
+textarea:focus {
+  border-color: var(--blush);
+  box-shadow: 0 0 0 4px rgba(232,180,168,.35);
 }
 
-#count-field .hint { text-align: center; }
+.hint.counter { text-align: right; font-style: normal; font-size: .8rem; color: var(--taupe); }
 
 .error {
   margin: 0 0 14px;
@@ -423,6 +423,15 @@ input[type="text"]:focus {
 }
 
 .thanks .lede { margin-bottom: 14px; }
+
+.closing {
+  margin: 22px 28px 0;
+  text-align: center;
+  font-style: italic;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--mocha);
+}
 
 /* ------------------------------------------------------------------ */
 /* Footer                                                              */

@@ -40,15 +40,15 @@
   function demoApi() {
     console.info('RSVP: API_URL is empty — using demo guest list.');
     var guests = [
-      { id: '0:5', name: 'Ibu Contoh Sekar Ayu (Mama Dinda)', side: 'Tamu Dinda', max: 1 },
-      { id: '0:6', name: 'Kak Bima Prasetyo - Mba Laras', side: 'Tamu Dinda', max: 3 },
-      { id: '0:7', name: 'Bp. Hendra Wijaya - Ibu Ratna', side: 'Tamu Dinda', max: 2 },
-      { id: '0:8', name: 'Mas Andi - Istri', side: 'Tamu Dinda', max: 4 },
-      { id: '1:5', name: 'Mas Andi - Istri', side: 'Tamu Ridho', max: 2 },
-      { id: '1:6', name: 'Bp. Rahmat Hidayat - Ibu Sari', side: 'Tamu Ridho', max: 2 },
-      { id: '1:7', name: 'Kak Nadia', side: 'Tamu Ridho', max: 1 },
-      { id: '1:8', name: 'Keluarga Besar Pakde Joko', side: 'Tamu Ridho', max: 2 },
-      { id: '1:9', name: 'Tamu Gagal Kirim', side: 'Tamu Ridho', max: 2 },
+      { id: '0:5', name: 'Ibu Contoh Sekar Ayu (Mama Dinda)', side: 'Tamu Dinda' },
+      { id: '0:6', name: 'Kak Bima Prasetyo - Mba Laras', side: 'Tamu Dinda' },
+      { id: '0:7', name: 'Bp. Hendra Wijaya - Ibu Ratna', side: 'Tamu Dinda' },
+      { id: '0:8', name: 'Mas Andi - Istri', side: 'Tamu Dinda' },
+      { id: '1:5', name: 'Mas Andi - Istri', side: 'Tamu Ridho' },
+      { id: '1:6', name: 'Bp. Rahmat Hidayat - Ibu Sari', side: 'Tamu Ridho' },
+      { id: '1:7', name: 'Kak Nadia', side: 'Tamu Ridho' },
+      { id: '1:8', name: 'Keluarga Besar Pakde Joko', side: 'Tamu Ridho' },
+      { id: '1:9', name: 'Tamu Gagal Kirim', side: 'Tamu Ridho' },
     ];
     function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
     return {
@@ -62,7 +62,7 @@
             return tokens.every(function (t) { return key.indexOf(t) !== -1; });
           })
           .map(function (g) {
-            return { id: g.id, name: g.name, max: g.max, side: counts[normalize(g.name)] > 1 ? g.side : '' };
+            return { id: g.id, name: g.name, side: counts[normalize(g.name)] > 1 ? g.side : '' };
           });
         return wait(350).then(function () { return { ok: true, results: results }; });
       },
@@ -81,7 +81,7 @@
 
   function normalize(s) {
     return String(s || '')
-      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, ' ')
       .trim();
@@ -97,7 +97,7 @@
   function highlight(name, query) {
     var tokens = normalize(query).split(' ').filter(Boolean);
     if (!tokens.length) return escapeHtml(name);
-    var flat = name.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    var flat = name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
     var marks = new Array(name.length).fill(false);
     tokens.forEach(function (t) {
       var i = flat.indexOf(t);
@@ -138,10 +138,9 @@
     changeName: $('change-name'),
     attendField: $('attend-field'),
     countField: $('count-field'),
-    countValue: $('count-value'),
-    countDec: $('count-dec'),
-    countInc: $('count-inc'),
-    countHint: $('count-hint'),
+    messageField: $('message-field'),
+    messageInput: $('message-input'),
+    messageCounter: $('message-counter'),
     error: $('form-error'),
     submit: $('submit-btn'),
     thanksTitle: $('thanks-title'),
@@ -150,9 +149,9 @@
   };
 
   var state = {
-    guest: null,      // { id, name, side, max }
+    guest: null,      // { id, name, side }
     status: '',
-    count: 1,
+    count: 0,         // 1 or 2 once chosen
     results: [],
     active: -1,
     seq: 0,
@@ -273,18 +272,24 @@
   /* Selection + answer                                                */
   /* ---------------------------------------------------------------- */
 
+  function resetAnswer() {
+    state.status = '';
+    state.count = 0;
+    el.form.querySelectorAll('input[name="status"], input[name="count"]').forEach(function (r) { r.checked = false; });
+    el.messageInput.value = '';
+    updateCounter();
+  }
+
   function choose(guest) {
     if (!guest) return;
     state.guest = guest;
-    state.status = '';
-    state.count = 1;
+    resetAnswer();
     closeList();
     el.searchHint.textContent = '';
     el.chosenName.textContent = guest.name + (guest.side ? ' · ' + guest.side : '');
     el.searchField.hidden = true;
     el.chosen.hidden = false;
     el.attendField.disabled = false;
-    el.form.querySelectorAll('input[name="status"]').forEach(function (r) { r.checked = false; });
     hideError();
     renderAnswer();
     el.form.querySelector('input[name="status"]').focus();
@@ -292,11 +297,10 @@
 
   el.changeName.addEventListener('click', function () {
     state.guest = null;
-    state.status = '';
+    resetAnswer();
     el.chosen.hidden = true;
     el.searchField.hidden = false;
     el.attendField.disabled = true;
-    el.form.querySelectorAll('input[name="status"]').forEach(function (r) { r.checked = false; });
     el.input.value = '';
     hideError();
     renderAnswer();
@@ -304,32 +308,27 @@
   });
 
   el.form.addEventListener('change', function (e) {
-    if (e.target.name !== 'status') return;
-    state.status = e.target.value;
+    if (e.target.name === 'status') state.status = e.target.value;
+    else if (e.target.name === 'count') state.count = Number(e.target.value);
+    else return;
     hideError();
     renderAnswer();
   });
 
-  el.countDec.addEventListener('click', function () { setCount(state.count - 1); });
-  el.countInc.addEventListener('click', function () { setCount(state.count + 1); });
+  function updateCounter() {
+    el.messageCounter.textContent = el.messageInput.value.length + '/' + el.messageInput.maxLength;
+  }
 
-  function setCount(n) {
-    var max = state.guest ? state.guest.max : 1;
-    state.count = Math.min(Math.max(n, 1), max);
-    renderAnswer();
+  el.messageInput.addEventListener('input', updateCounter);
+
+  function isComplete() {
+    return !!state.guest && !!state.status && (state.status !== 'Hadir' || state.count > 0);
   }
 
   function renderAnswer() {
-    var attending = state.status === 'Hadir' && state.guest;
-    el.countField.hidden = !attending;
-    if (attending) {
-      var max = state.guest.max;
-      el.countValue.textContent = state.count;
-      el.countDec.disabled = state.count <= 1;
-      el.countInc.disabled = state.count >= max;
-      el.countHint.textContent = 'Maksimal ' + max + ' orang sesuai undangan';
-    }
-    el.submit.disabled = state.submitting || !state.guest || !state.status;
+    el.countField.hidden = !(state.guest && state.status === 'Hadir');
+    el.messageField.hidden = !(state.guest && state.status);
+    el.submit.disabled = state.submitting || !isComplete();
   }
 
   /* ---------------------------------------------------------------- */
@@ -338,7 +337,7 @@
 
   el.form.addEventListener('submit', function (e) {
     e.preventDefault();
-    if (state.submitting || !state.guest || !state.status) return;
+    if (state.submitting || !isComplete()) return;
 
     state.submitting = true;
     el.submit.classList.add('loading');
@@ -351,6 +350,7 @@
       name: state.guest.name,
       status: state.status,
       count: state.status === 'Hadir' ? state.count : 0,
+      message: el.messageInput.value.trim(),
     })
       .then(function (res) {
         if (!res || !res.ok) {
@@ -386,11 +386,12 @@
     if (res.status === 'Hadir') {
       el.thanksTitle.textContent = 'Sampai Jumpa!';
       el.thanksText.textContent = 'Terima kasih, ' + name + '. Kami sangat menantikan kehadiran ' +
-        (res.count > 1 ? res.count + ' orang' : 'Anda') + ' di hari bahagia kami.';
+        (res.count > 1 ? res.count + ' orang' : 'Anda') + ' di hari bahagia kami.' +
+        (el.messageInput.value.trim() ? ' Terima kasih juga atas ucapan dan doa restunya.' : '');
     } else {
       el.thanksTitle.textContent = 'Terima Kasih';
       el.thanksText.textContent = 'Terima kasih atas konfirmasinya, ' + name +
-        '. Doa dan restu Anda sangat berarti bagi kami.';
+        '. Meskipun berhalangan hadir, doa restu Anda sangat berarti bagi kami.';
     }
     el.formView.hidden = true;
     el.thanksView.hidden = false;

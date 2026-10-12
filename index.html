@@ -112,7 +112,7 @@
 
       <section id="form-view" class="body">
         <h2 class="title">Konfirmasi Kehadiran</h2>
-        <p class="lede">Merupakan suatu kehormatan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir. Mohon konfirmasi kehadiran Anda di bawah ini.</p>
+        <p class="lede">Merupakan suatu kehormatan dan kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu kepada kami. Mohon konfirmasi kehadiran Anda di bawah ini.</p>
 
         <form id="rsvp-form" novalidate>
           <div class="field" id="search-field">
@@ -147,14 +147,25 @@
             </div>
           </fieldset>
 
-          <div class="field" id="count-field" hidden>
-            <span class="label" id="count-label">Jumlah tamu yang hadir</span>
-            <div class="stepper" role="group" aria-labelledby="count-label">
-              <button type="button" id="count-dec" aria-label="Kurangi">−</button>
-              <output id="count-value" aria-live="polite">1</output>
-              <button type="button" id="count-inc" aria-label="Tambah">+</button>
+          <fieldset class="field" id="count-field" hidden>
+            <legend>Jumlah tamu yang hadir</legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="radio" name="count" value="1">
+                <span>1 orang</span>
+              </label>
+              <label class="choice">
+                <input type="radio" name="count" value="2">
+                <span>2 orang</span>
+              </label>
             </div>
-            <p class="hint" id="count-hint"></p>
+          </fieldset>
+
+          <div class="field" id="message-field" hidden>
+            <label for="message-input">Ucapan &amp; Doa <span class="optional">(opsional)</span></label>
+            <textarea id="message-input" rows="4" maxlength="500"
+                      placeholder="Tuliskan ucapan dan doa restu untuk kedua mempelai…"></textarea>
+            <p class="hint counter" id="message-counter">0/500</p>
           </div>
 
           <p class="error" id="form-error" role="alert" hidden></p>
@@ -171,6 +182,8 @@
         <p class="lede" id="thanks-text"></p>
         <button type="button" class="link" id="edit-answer">Ubah jawaban</button>
       </section>
+
+      <p class="closing">Atas kehadiran dan doa restunya,<br>kami ucapkan terima kasih.</p>
 
       <footer class="foot">
         <span class="rule"></span>
