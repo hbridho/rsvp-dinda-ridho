@@ -389,7 +389,7 @@
     el.formView.hidden = true;
     el.thanksView.hidden = false;
     el.thanksView.focus({ preventScroll: true });
-    $('rsvp').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   el.editAnswer.addEventListener('click', function () {
