@@ -158,13 +158,6 @@
     submitting: false,
   };
 
-  if (CFG.COUPLE) {
-    document.querySelectorAll('[data-couple]').forEach(function (n) {
-      var v = CFG.COUPLE[n.getAttribute('data-couple')];
-      if (v) n.textContent = v;
-    });
-    document.title = 'RSVP · ' + CFG.COUPLE.first + ' & ' + CFG.COUPLE.second;
-  }
   el.input.placeholder = 'Ketik minimal ' + MIN_CHARS + ' huruf…';
 
   /* ---------------------------------------------------------------- */
@@ -395,8 +388,8 @@
     }
     el.formView.hidden = true;
     el.thanksView.hidden = false;
-    el.thanksView.focus();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    el.thanksView.focus({ preventScroll: true });
+    $('rsvp').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   el.editAnswer.addEventListener('click', function () {
